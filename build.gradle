@@ -1,0 +1,214 @@
+/* Gradle script for build of FIDATA Report Template
+   Copyright (C) 2014  Basil Peace
+
+   This file is part of FIDATA Report Template.
+
+   FIDATA Report Template is free software: you can redistribute it
+   and/or modify it under the terms of the GNU General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   FIDATA Report Template is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with FIDATA Report Template.  If not, see
+   <http://www.gnu.org/licenses/>. */
+
+buildscript {
+	repositories {
+		jcenter()
+		maven {
+			url "$artifactory_contextUrl/plugins-release"
+			credentials {
+				username = artifactory_user
+				password = artifactory_password
+			}
+		}
+	}
+	dependencies {
+		classpath(
+			group: 'org.jfrog.buildinfo',
+			name: 'build-info-extractor-gradle',
+			version: '2.2.3'
+		)
+	}
+}
+
+
+// Plugins
+
+apply plugin: 'distribution'
+apply plugin: 'maven-publish'
+apply plugin: 'artifactory-publish'
+
+
+// Project info
+
+group = 'FIDATA'
+version = '0.3-SNAPSHOT'
+// buildInfo.build.name = ''
+// buildInfo.build.number = ''
+
+
+// Sources
+// sourceSets {
+// 	main { resources { srcDir 'src/main/**' } }
+// }
+
+
+// Tasks
+
+def stagingDir = buildDir
+
+configurations {
+	compile
+	runtime
+}
+
+dependencies {
+	compile group: 'FIDATA', name: 'fonts', version: '0.3-SNAPSHOT', ext: 'zip'
+	runtime group: 'FIDATA', name: 'fonts', version: '0.3-SNAPSHOT', ext: 'zip'
+}
+
+distributions {
+	main {
+		contents {
+			from("$stagingDir/fidata-report-template.cls")
+			from("$stagingDir/") { include 'red_corps_castle2*.pdf' }
+			from("LICENSE.txt")
+		}
+	}
+	src {
+		contents {
+			from("src/main")
+			from("LICENSE.txt")
+		}
+	}
+	doc {
+		contents {
+			from("$stagingDir/fidata-report-template.pdf")
+			from("LICENSE.txt")
+		}
+	}
+	examples {
+		contents {
+			from("src/main/tex/example.tex")
+			from("src/main/tex/nola.eps")
+			from("$stagingDir/example.pdf")
+			from("LICENSE.CC0.txt")
+		}
+	}
+}
+
+
+artifactory {
+	contextUrl = artifactory_contextUrl
+	publish {
+		repository {
+			repoKey = 'libs-snapshot-local'
+			username = artifactory_user
+			password = artifactory_password
+			maven = true
+		}
+		defaults {
+			publications ('artifactPublication')
+		}
+	}
+	resolve {
+		repository {
+			repoKey = 'libs-snapshot'
+			username = artifactory_user
+			password = artifactory_password
+			maven = true
+		}
+	}
+}
+
+defaultTasks 'clean', 'all'
+
+task mkStagingDir << {
+	stagingDir.mkdirs()
+}
+
+task copySources(type: Copy) {
+	dependsOn mkStagingDir
+	from('src/main/tex') {
+		include '**'
+	}
+	into stagingDir
+}
+
+task explodeDeps {
+	dependsOn mkStagingDir
+	dependsOn configurations.compile
+	doLast {
+		configurations.compile.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact artifact ->
+			if ((artifact.moduleVersion.id.group == 'FIDATA') && (artifact.moduleVersion.id.name == 'fonts')) {
+				def fileName = "$stagingDir/${artifact.file.name}" - ".zip"
+				copy {
+					from(zipTree(artifact.file))
+					into stagingDir
+				}
+				file("$fileName/fonts").renameTo(file("$stagingDir/fonts"))
+				file(fileName).delete()
+
+			}
+		}
+	}
+}
+
+task latexmkBuild(type: Exec) {
+	dependsOn copySources, explodeDeps
+	workingDir stagingDir
+	commandLine 'latexmk'
+}
+
+task build {
+	dependsOn latexmkBuild
+}
+
+distZip {
+	dependsOn build
+}
+
+docDistZip {
+	dependsOn build
+}
+
+examplesDistZip {
+	dependsOn build
+}
+
+artifactoryPublish {
+	dependsOn distZip
+	dependsOn srcDistZip
+	dependsOn docDistZip
+	dependsOn examplesDistZip
+}
+
+task all {
+	dependsOn artifactoryPublish
+}
+
+// Settings
+
+
+publishing {
+	publications {
+		artifactPublication(MavenPublication) { // TODO: classifiers
+			artifact("$buildDir/distributions/${project.name}-${project.version}.zip")
+			artifact("$buildDir/distributions/${project.name}-src-${project.version}.zip") {
+				classifier 'src'
+			}
+			artifact("$buildDir/distributions/${project.name}-doc-${project.version}.zip") {
+				classifier 'doc'
+			}
+			artifact("$buildDir/distributions/${project.name}-examples-${project.version}.zip") {
+				classifier 'examples'
+			}
+		}
+	}
+}
