@@ -17,6 +17,7 @@
 
 \documentclass{fidata-report-template}
 \usepackage{lipsum}
+\usepackage[main = english, latin]{babel}
 \begin{document}
 
 \frontmatter
@@ -59,7 +60,7 @@
 \additionalinfo{Supersedes ERDC/CREL AF-01-23}
 
 \begin{abstract}
-  \lipsum[12-13]
+  \begin{otherlanguage*}{latin}\lipsum[12-13]\end{otherlanguage*}
 \end{abstract}
 
 %\disclaimer{Some other disclaimer}
@@ -81,7 +82,7 @@
 \listoffiguresandtables
 
 \chapter{Preface}
-\lipsum[1-5]
+\begin{otherlanguage*}{latin}\lipsum[1-5]\end{otherlanguage*}
 
 \chapter{Unit Conversion Factors}
 
@@ -209,6 +210,8 @@ yards & 0.9144 & meters\\
 
 \mainmatter
 
+\begin{otherlanguage*}{latin}
+
 \chapter{Duis ante felis, dignissim id, blandit in, suscipit vel,
   dolor}
 \section{Duis ante felis: duis sagittis massa, dignissim id, blandit
@@ -245,6 +248,8 @@ yards & 0.9144 & meters\\
 
 \lipsum[17-18]
 
+\end{otherlanguage*}
+
 \begin{table}
   \centering
   \caption{Yearly Dividens}
@@ -263,9 +268,13 @@ yards & 0.9144 & meters\\
   \end{tabular}
 \end{table}
 
+\begin{otherlanguage*}{latin}
+
 \subsection{Sagittis massa}
 
 \lipsum[24]
+
+\end{otherlanguage*}
 
 \begin{figure}
   \centering
@@ -273,6 +282,8 @@ yards & 0.9144 & meters\\
   \caption{Castle}
   \label{fig:castle}
 \end{figure}
+
+\begin{otherlanguage*}{latin}
 
 \lipsum[9]
 
@@ -300,6 +311,8 @@ yards & 0.9144 & meters\\
 
 \lipsum[10]
 
+\end{otherlanguage*}
+
 \begin{figure}
   \centering
   \fbox{\includegraphics[width=4in]{nola}}
@@ -307,9 +320,13 @@ yards & 0.9144 & meters\\
   \label{fig:nola}
 \end{figure}
 
+\begin{otherlanguage*}{latin}
+
 \section{Aenean imperdiet}
 
 \lipsum[11]
+
+\end{otherlanguage*}
 
 \nocite{*}
 
@@ -317,6 +334,8 @@ yards & 0.9144 & meters\\
 \bibliography{fidata-report-template}
 
 \appendix
+
+\begin{otherlanguage*}{latin}
 
 \chapter{Aenean imperdiet}
 
@@ -327,6 +346,8 @@ yards & 0.9144 & meters\\
   \frac{\partial H}{\partial x} = -X
 \end{equation}
 
+\end{otherlanguage*}
+
 \begin{figure}
   \centering
   \fbox{\includegraphics[width=2in]{red_corps_castle2}}
@@ -334,8 +355,12 @@ yards & 0.9144 & meters\\
   \label{fig:castle1}
 \end{figure}
 
+\begin{otherlanguage*}{latin}
+
 \lipsum[26]
 \lipsum[32]
+
+\end{otherlanguage*}
 
 \begin{equation}
   \label{eq:D}
@@ -374,6 +399,8 @@ yards & 0.9144 & meters\\
   \end{tabular}
 \end{table}
 
+\begin{otherlanguage*}{latin}
+
 \lipsum[27]
 
 \chapter{Pellentesque habitant
@@ -381,6 +408,9 @@ yards & 0.9144 & meters\\
   egestas}
 
 \lipsum[16-22]
+
+\end{otherlanguage*}
+
 \begin{equation}
   \label{eq:U}
   S = -kT\ln\Xi
